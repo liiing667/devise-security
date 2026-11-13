@@ -45,11 +45,25 @@ end
 
 # When a user is signing out intentionally, we clear the unique session id
 # to prevent session replay attacks. This ensures there are 0 valid active
-# sessions immediately after signing out.
+# sessions immediately after signing out. The stored identifier is only
+# cleared when it still matches the identifier held by the signing-out
+# session: if another browser signed in afterwards and rotated the
+# identifier, this (now stale) session must not wipe the newer session.
+# The compare-and-clear is atomic at the database layer, so concurrent
+# sign-outs cannot overwrite a concurrent new login either.
 Warden::Manager.before_logout do |record, warden, options|
   if record.nil? == false &&
      record.devise_modules&.include?(:session_limitable) &&
      !record.skip_session_limitable?
-    record.update_unique_session_id!(nil)
+    scope = options[:scope]
+    # The user has already been removed from warden's authenticated users
+    # by the time before_logout runs, so read the scoped session directly
+    # from the raw session instead of Warden::Proxy#session which would
+    # raise Warden::NotAuthenticated.
+    scoped_session = warden.raw_session["warden.user.#{scope}.session"] || {}
+    unique_session_id = scoped_session['unique_session_id']
+    unless unique_session_id.nil?
+      record.clear_unique_session_id_if_matches!(unique_session_id)
+    end
   end
 end

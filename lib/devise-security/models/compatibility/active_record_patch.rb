@@ -35,6 +35,19 @@ module Devise
         def update_attribute_without_validatons_or_callbacks(name, value)
           update_column(name, value)
         end
+
+        # Atomically updates the record with the value only when all of the
+        # given conditions match, without triggering validations or callbacks.
+        # The comparison happens in a single UPDATE statement so concurrent
+        # updates cannot interleave.
+        # @param name [Symbol] attribute to update
+        # @param value [String] value to set
+        # @param conditions [Hash] attributes the row must currently hold
+        # @return [Boolean] whether a row was updated
+        def update_attribute_if_matches_without_validations_or_callbacks(name, value, conditions)
+          self.class.unscoped.where(conditions.merge(self.class.primary_key => id))
+                    .update_all(name => value) == 1
+        end
       end
     end
   end
