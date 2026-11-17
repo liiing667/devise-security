@@ -34,8 +34,12 @@ module DeviseSecurity
       end
 
       def valid_security_question_answer?(resource, answer)
-        resource.security_question_answer.present? &&
-          resource.security_question_answer == answer
+        if resource.respond_to?(:valid_security_question_answer?)
+          resource.valid_security_question_answer?(answer)
+        else
+          resource.security_question_answer.present? &&
+            resource.security_question_answer == answer
+        end
       end
 
       # controller instance methods

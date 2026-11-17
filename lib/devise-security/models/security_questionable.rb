@@ -18,6 +18,13 @@ module Devise
       def self.required_fields(_klass)
         [:security_question_id, :security_question_answer]
       end
+
+      # Enumeration-safe answer check: a blank stored answer never matches,
+      # so resources without a security question behave exactly like unknown
+      # resources to callers.
+      def valid_security_question_answer?(answer)
+        security_question_answer.present? && security_question_answer == answer
+      end
     end
   end
 end

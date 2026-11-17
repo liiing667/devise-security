@@ -68,6 +68,12 @@ module Devise
   mattr_accessor :security_question_for_confirmation
   @@security_question_for_confirmation = false
 
+  # Maximum number of failed security question attempts per session before
+  # further attempts are rejected with the generic failure response.
+  # Set to +nil+ or +0+ to disable throttling.
+  mattr_accessor :security_question_max_attempts
+  @@security_question_max_attempts = 5
+
   # captcha integration for confirmation form
   mattr_accessor :captcha_for_confirmation
   @@captcha_for_confirmation = false

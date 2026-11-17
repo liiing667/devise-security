@@ -125,6 +125,11 @@ Devise.setup do |config|
   # this automatically enables captchas (captcha_for_confirmation, as fallback)
   # config.security_question_for_confirmation = false
 
+  # Maximum number of failed security question attempts per session before
+  # further attempts are rejected with the generic failure response.
+  # Set to nil or 0 to disable throttling.
+  # config.security_question_max_attempts = 5
+
   # ==> Configuration for :expirable
   # Time period for account expiry from last_activity_at
   # config.expire_after = 90.days
